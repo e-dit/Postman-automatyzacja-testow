@@ -1,0 +1,229 @@
+{
+	"info": {
+		"_postman_id": "68982e0d-c967-4ddb-b0a8-9e388d4561a0",
+		"name": "Postman automatyzacja testów projects",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "projects",
+			"item": [
+				{
+					"name": "User can create a new project",
+					"item": [
+						{
+							"name": "User creates a new project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Project has correct name\", function () {",
+											"    var createdProject = pm.response.json();",
+											"    var expected = pm.globals.get(\"projectName\");",
+											"    pm.expect(createdProject.name).to.eql(expected);",
+											"",
+											"    pm.globals.set(\"projectId\", createdProject.id);",
+											"    pm.globals.set(\"projectOrder\", createdProject.order);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"id": "27d36053-103b-428a-a960-7be0866c4148"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.globals.clear();",
+											"if (pm.variables.has(\"data_projectName\")) {",
+											"    pm.globals.set(\"projectName\", pm.variables.get(\"data_projectName\"))",
+											"} else {",
+											"    var name = pm.variables.replaceIn(\"TC1: {{$randomProductName}}\")",
+											"    pm.globals.set(\"projectName\", name)",
+											"}",
+											""
+										],
+										"type": "text/javascript",
+										"id": "46b8213b-5da2-42dc-8cd7-da142d0b04a9"
+									}
+								}
+							],
+							"id": "c9e26f84-6aaa-4514-90e7-71484c46a445",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{projectName}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{todoist_url}}/projects/"
+							},
+							"response": []
+						},
+						{
+							"name": "User checks if project was created",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    var project = pm.response.json();    ",
+											"",
+											"    pm.test(\"Project has correct id\", function () {",
+											"        var expected = pm.globals.get(\"projectId\")",
+											"        pm.expect(project.id).to.eql(expected);",
+											"    });",
+											"",
+											"    pm.test(\"Project has correct name\", function () {",
+											"        var expected = pm.globals.get(\"projectName\")",
+											"        pm.expect(project.name).to.eql(expected);",
+											"    });",
+											"",
+											"    pm.test(\"Project has correct order\", function () {",
+											"        var expected = pm.globals.get(\"projectOrder\")",
+											"        pm.expect(project.order).to.eql(expected);",
+											"    });",
+											"});",
+											"",
+											"   ",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"id": "e537cb49-e745-4ab3-8133-af4482c1d100"
+									}
+								}
+							],
+							"id": "25914542-4235-462f-9466-07308fc4b12c",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{todoist_url}}/projects/{{projectId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "User checks all projects list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"",
+											"    ",
+											"    var allProjects = pm.response.json();",
+											"    var expectedId = pm.globals.get(\"projectId\");",
+											"",
+											"    var projectToCheck;",
+											"    allProjects.forEach( function (prj) {",
+											"        console.log(prj.id)",
+											"        if (prj.id == expectedId) {",
+											"            projectToCheck = prj;",
+											"        } ",
+											"    })",
+											"",
+											"    pm.test(\"Project has correct name\", function () {        ",
+											"        var expectedName = pm.globals.get(\"projectName\")",
+											"        pm.expect(projectToCheck.name).to.eql(expectedName);",
+											"    });",
+											"});",
+											"",
+											"// pm.test(\"Project with ID exists on all projects list\", function () {",
+											"//     var allProjects = pm.response.text();",
+											"//     var projectId = pm.globals.get(\"projectId\");",
+											"//     var searchString = `\"id\": \"${projectId}\",`;",
+											"//     pm.expect(allProjects).to.include(searchString);",
+											"// });",
+											"",
+											"// pm.test(\"Project with Id exists on list [JSON]\", function () {",
+											"//     var allProjects = pm.response.json();",
+											"//     var projectsCount = allProjects.length",
+											"//     var expectedId = pm.globals.get(\"projectId\");",
+											"//     pm.expect(allProjects[projectsCount - 1].id).to.eql(expectedId);",
+											"// });",
+											"",
+											"// pm.test(\"Project with Id exists on list and have correct name\", function () {",
+											"//     var allProjects = pm.response.json();",
+											"//     var projectsCount = allProjects.length",
+											"//     var expectedName = pm.globals.get(\"projectName\");",
+											"//     pm.expect(allProjects[projectsCount - 1].name).to.eql(expectedName);",
+											"// });",
+											"",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"id": "dc96aa8c-c12c-40f3-89c1-8643f0737a8d"
+									}
+								}
+							],
+							"id": "3a71aa7b-ef02-4547-afc4-8eea15bee653",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{todoist_url}}/projects/"
+							},
+							"response": []
+						}
+					],
+					"id": "63ba4f37-42c0-4fd0-aeb3-06fa5bb962db"
+				}
+			],
+			"id": "dac2b01c-a729-4b0b-8a2e-8dfece9fcc26"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{todoist_token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "effaffce-16cf-47c1-90fa-ff28727f0785"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "38b6856b-d68a-46dc-95c2-623319fc8fc1"
+			}
+		}
+	]
+}
