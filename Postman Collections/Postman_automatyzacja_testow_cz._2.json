@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "c9565e24-1b73-499c-96d7-5352a81cbed9",
+		"name": "Postman automatyzacja testów tasks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "tasks",
+			"item": [
+				{
+					"name": "User can add task to the project",
+					"item": [
+						{
+							"name": "User has project created",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Project has correct name\", function () {",
+											"    var createdProject = pm.response.json();",
+											"    var expected = pm.globals.get(\"projectName\");",
+											"    pm.expect(createdProject.name).to.eql(expected);",
+											"    pm.globals.set(\"projectId\", createdProject.id);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"id": "5d709870-e277-4745-b596-4746783f9ed3"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.globals.clear();",
+											"pm.globals.set(\"projectName\", \"TC2: Projekt na zadanie\");",
+											"pm.globals.set(\"taskName\", \"TC2: moje zadanie\");"
+										],
+										"type": "text/javascript",
+										"id": "710cca00-a94d-4de5-a6ee-3a76b1d08fa7"
+									}
+								}
+							],
+							"id": "e5131265-0190-4027-8a05-37a80ba462f3",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{projectName}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{todoist_url}}/projects/"
+							},
+							"response": []
+						},
+						{
+							"name": "User adds a new task to the project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Task is added to correct project\", function () {",
+											"    var task = pm.response.json();",
+											"    var expected = pm.globals.get(\"projectId\");",
+											"    pm.expect(task.project_id).to.eql(expected)",
+											"})",
+											"",
+											"pm.test(\"Task has correct name\", function () {",
+											"    var task = pm.response.json();",
+											"    var expected = pm.globals.get(\"taskName\");",
+											"    pm.expect(task.content).to.eql(expected);",
+											"    pm.globals.set(\"taskId\", task.id)",
+											"});"
+										],
+										"type": "text/javascript",
+										"id": "dcc0b485-1113-43f9-9be3-17ab7908ce87"
+									}
+								}
+							],
+							"id": "8ed8975b-d032-4a27-81e1-68dfe43f56a7",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"content\": \"{{taskName}}\",\n    \"project_id\": \"{{projectId}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{todoist_url}}/tasks"
+							},
+							"response": []
+						},
+						{
+							"name": "User check if task was created",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Task has correct name\", function () {",
+											"    var task = pm.response.json();",
+											"    var expected = pm.globals.get(\"taskName\");",
+											"    pm.expect(task.content).to.eql(expected);",
+											"});",
+											"",
+											"pm.test(\"Task has correct id\", function () {",
+											"    var task = pm.response.json();",
+											"    var expected = pm.globals.get(\"taskId\");",
+											"    pm.expect(task.id).to.eql(expected);",
+											"})",
+											"",
+											"pm.test(\"Task is added to correct project\", function () {",
+											"    var task = pm.response.json();",
+											"    var expected = pm.globals.get(\"projectId\");",
+											"    pm.expect(task.project_id).to.eql(expected)",
+											"})"
+										],
+										"type": "text/javascript",
+										"id": "67d523a6-14b9-47c6-b1a3-c4b6ee31d000"
+									}
+								}
+							],
+							"id": "cd686d58-bd3b-4f05-8703-2bc9e6bb8196",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{todoist_url}}/tasks/{{taskId}}"
+							},
+							"response": []
+						},
+						{
+							"name": "User checks if task is on all tasks list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var tasks = pm.response.json();",
+											"var taskToCheck;",
+											"",
+											"tasks.forEach(function (task) {",
+											"    var expectedId = pm.globals.get(\"taskId\");",
+											"    if (task.id == expectedId ) {",
+											"        taskToCheck = task;",
+											"    }",
+											"})",
+											"",
+											"pm.test(\"Task has correct name\", function () {",
+											"    var expected = pm.globals.get(\"taskName\");",
+											"    pm.expect(taskToCheck.content).to.eql(expected);",
+											"});",
+											"pm.test(\"Task is in correct project\", function () {",
+											"    var expected = pm.globals.get(\"projectId\");            ",
+											"    pm.expect(taskToCheck.project_id).to.eql(expected);",
+											"});"
+										],
+										"type": "text/javascript",
+										"id": "15a43b8a-8dda-490a-a507-d3fc310e886d"
+									}
+								}
+							],
+							"id": "63ce24e5-50a2-4833-9b43-810f20219e2f",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{todoist_url}}/tasks"
+							},
+							"response": []
+						}
+					],
+					"id": "66cef67b-e3ce-46b0-998b-8f68870eff92"
+				}
+			],
+			"id": "8d56d866-aa11-46e7-b856-959c394cc03a"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{todoist_token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "effaffce-16cf-47c1-90fa-ff28727f0785"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "38b6856b-d68a-46dc-95c2-623319fc8fc1"
+			}
+		}
+	]
+}
